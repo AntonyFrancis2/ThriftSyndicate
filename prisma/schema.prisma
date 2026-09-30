@@ -110,6 +110,7 @@ model Branch {
   name          String
   address       String
   city          String
+  state         String   @default("") // for CGST+SGST vs IGST on invoices
   pincode       String
   phone         String
   hours         String

@@ -4,6 +4,8 @@ import { canTransition, nextFulfilmentStatus } from "@/lib/orders/status";
 import { formatINR, includedGst, gstRateForItem } from "@/lib/money";
 import { hmacHex, hmacMatches } from "@/lib/payments/gateway";
 import { interpretQuery } from "@/lib/catalog";
+import { slugify } from "@/lib/products";
+import { newOrderNumber } from "@/lib/orders/checkout";
 
 describe("order status rules", () => {
   it("only awaiting-approval orders can be approved, rejected or cancelled", () => {
@@ -75,5 +77,19 @@ describe("search synonyms", () => {
   it("maps tee and denim to categories", () => {
     expect(interpretQuery("vintage tee nike")).toEqual({ category: "TSHIRT", era: "RETRO", text: "nike" });
     expect(interpretQuery("denim")).toMatchObject({ category: "JEANS", text: "" });
+  });
+});
+
+describe("slugs", () => {
+  it("strips accents and punctuation", () => {
+    expect(slugify("Stüssy Stock Logo Tee")).toBe("stussy-stock-logo-tee");
+    expect(slugify("Levi's 501 — 1990s")).toBe("levi-s-501-1990s");
+  });
+});
+
+describe("order numbers", () => {
+  it("use the IST calendar day", () => {
+    // 20:00 UTC on 30 Sep is 01:30 IST on 1 Oct.
+    expect(newOrderNumber("IND", new Date("2026-09-30T20:00:00Z"))).toMatch(/^TS-IND-261001-[0-9A-F]{5}$/);
   });
 });

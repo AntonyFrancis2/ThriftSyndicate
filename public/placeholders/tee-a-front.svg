@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<rect width="800" height="1000" fill="#F5F5F3"/>
+<g fill="#0A0A0A"><path d="M270 190 L350 160 Q400 200 450 160 L530 190 L640 290 L580 360 L540 320 L540 820 L260 820 L260 320 L220 360 L160 290 Z"/></g>
+<text x="40" y="960" font-family="ui-monospace, Menlo, monospace" font-size="26" letter-spacing="4" fill="#6B6B6B">PLACEHOLDER · FRONT</text>
+</svg>

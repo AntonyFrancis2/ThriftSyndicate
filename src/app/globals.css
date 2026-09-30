@@ -1,26 +1,158 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ThriftSyndicate design tokens (PRD §9.2). Photos are the only full-colour element on the page. */
+@theme {
+  --color-ink: #0a0a0a;
+  --color-charcoal: #1f1f1f;
+  --color-graphite: #3d3d3d;
+  --color-steel: #6b6b6b;
+  --color-ash: #bdbdbd;
+  --color-mist: #e6e6e6;
+  --color-bone: #f5f5f3;
+  --color-paper: #ffffff;
+  /* Functional only: errors and the "Sold" overlay. Never decorative. */
+  --color-signal: #c62828;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-display: var(--font-anton), "Impact", sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --radius-tag: 2px;
+  --animate-marquee: marquee 30s linear infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+}
+
+@layer components {
+  /* Condensed uppercase headline. */
+  .display {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+  }
+  /* "Archive label" detail text: SKUs, era tags, sizes (PRD §9.3). */
+  .label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+  /* Thrift price-tag motif. */
+  .tag {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    border: 1px solid currentColor;
+    border-radius: var(--radius-tag);
+    padding: 2px 6px;
+    display: inline-block;
+    line-height: 1.4;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 24px;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--radius-tag);
+    transition: background-color 150ms, color 150ms, border-color 150ms;
+    cursor: pointer;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+  .btn-primary {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    border: 1px solid var(--color-ink);
+  }
+  .btn-primary:not(:disabled):hover {
+    background: var(--color-charcoal);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid var(--color-ink);
+  }
+  .btn-secondary:not(:disabled):hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  /* Underline-style inputs (PRD §9.4). */
+  .field {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-ash);
+    padding: 10px 0;
+    font-size: 16px;
+    border-radius: 0;
+  }
+  .field:focus {
+    outline: none;
+    border-bottom-color: var(--color-ink);
+  }
+  .field[aria-invalid="true"] {
+    border-bottom-color: var(--color-signal);
+  }
+  .field-label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--color-steel);
+  }
+  .box {
+    border: 1px solid var(--color-mist);
+    padding: 12px;
+    border-radius: 0;
+    background: var(--color-paper);
+    width: 100%;
+    font-size: 15px;
+  }
+  .box:focus {
+    outline: none;
+    border-color: var(--color-ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

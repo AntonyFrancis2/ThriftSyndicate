@@ -4,16 +4,13 @@ import { db } from "@/lib/db";
 import { DomainError } from "@/lib/errors";
 import { includedGstForItems } from "@/lib/money";
 import { getGateway } from "@/lib/payments";
+import { shippingFor } from "@/lib/pricing";
 import type { ValidCheckout } from "./checkout-schema";
 import { heldQuantities, lockVariants } from "./inventory";
 
-export function shippingFor(deliveryType: "HOME" | "PICKUP", subtotalPaise: number): number {
-  if (deliveryType === "PICKUP") return 0;
-  return subtotalPaise >= storeConfig.freeShippingThresholdPaise ? 0 : storeConfig.shippingFeePaise;
-}
-
 export function newOrderNumber(branchCode: string, now = new Date()): string {
-  const yymmdd = now.toISOString().slice(2, 10).replaceAll("-", "");
+  // The store's calendar day (IST), not UTC.
+  const yymmdd = now.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }).slice(2).replaceAll("-", "");
   const suffix = randomBytes(3).toString("hex").toUpperCase().slice(0, 5);
   return `TS-${branchCode}-${yymmdd}-${suffix}`;
 }
@@ -37,6 +34,8 @@ export async function createCheckout(input: ValidCheckout, now = new Date()): Pr
     quantities.set(item.variantId, (quantities.get(item.variantId) ?? 0) + item.quantity);
   }
   const variantIds = [...quantities.keys()];
+  // Resolve the gateway first so a misconfiguration fails before anything is reserved.
+  const gateway = getGateway();
   const expiresAt = new Date(now.getTime() + storeConfig.reservationMinutes * 60_000);
 
   const created = await db.$transaction(async (tx) => {
@@ -158,7 +157,6 @@ export async function createCheckout(input: ValidCheckout, now = new Date()): Pr
     return { checkout, orders, customer };
   });
 
-  const gateway = getGateway();
   let razorpayOrderId: string;
   try {
     const rzpOrder = await gateway.createOrder({

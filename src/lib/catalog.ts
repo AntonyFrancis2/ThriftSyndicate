@@ -98,7 +98,7 @@ async function searchIds(text: string): Promise<string[]> {
     SELECT id FROM "Product"
     WHERE status IN ('PUBLISHED', 'SOLD')
       AND (
-        word_similarity(${text}, lower(title || ' ' || brand || ' ' || coalesce(team, ''))) > 0.45
+        word_similarity(${text}, lower(title || ' ' || brand || ' ' || coalesce(team, ''))) > 0.4
         OR lower(title || ' ' || brand || ' ' || coalesce(team, '')) LIKE ${"%" + text + "%"}
       )
     ORDER BY word_similarity(${text}, lower(title || ' ' || brand || ' ' || coalesce(team, ''))) DESC
