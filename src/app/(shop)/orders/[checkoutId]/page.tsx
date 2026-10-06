@@ -27,10 +27,10 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       {sp.placed && paid && (
-        <div className="mb-10 bg-ink p-6 text-paper">
+        <div className="mb-10 bg-positive p-6 text-ink">
           <CheckCircle2 className="size-8" strokeWidth={1.5} aria-hidden />
           <h1 className="display mt-4 text-5xl">Order placed</h1>
-          <p className="mt-2 text-ash">
+          <p className="mt-2 text-graphite">
             Awaiting confirmation from our store. We check every piece is on the rack and as described, usually within a few hours
             (always within {storeConfig.approvalAlertHours} hours). If we can&apos;t confirm it, you get a full refund automatically.
           </p>
@@ -118,10 +118,10 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
               </div>
             )}
 
-            <ol className="mt-6 space-y-3 border-l border-ink pl-5">
+            <ol className="mt-6 space-y-3 border-l border-primary pl-5">
               {order.events.map((e) => (
                 <li key={e.id} className="relative text-sm">
-                  <span className="absolute -left-[25px] top-1.5 size-2 rounded-full bg-ink" aria-hidden />
+                  <span className="absolute -left-[25px] top-1.5 size-2 rounded-full bg-primary" aria-hidden />
                   <span className="label mr-2 text-steel">
                     {e.createdAt.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                   </span>

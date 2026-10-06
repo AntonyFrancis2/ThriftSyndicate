@@ -35,7 +35,7 @@ export function SiteHeader() {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-colors duration-200 ${dark ? "bg-ink text-paper [--logo-bg:#0a0a0a]" : "border-b border-mist bg-paper text-ink [--logo-bg:#fff]"}`}
+      className={`sticky top-0 z-40 transition-colors duration-200 ${dark ? "bg-ink text-paper [--logo-bg:var(--color-ink)]" : "border-b border-mist bg-paper text-ink [--logo-bg:var(--color-paper)]"}`}
     >
       <div className="mx-auto grid h-16 max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-4 md:px-8">
         <div className="flex items-center gap-6">
@@ -60,7 +60,7 @@ export function SiteHeader() {
           <Link href="/bag" className="relative p-2" aria-label={`Bag, ${count} item${count === 1 ? "" : "s"}`}>
             <ShoppingBag className="size-5" strokeWidth={1.5} />
             {count > 0 && (
-              <span className={`label absolute -right-0.5 -top-0.5 grid size-5 place-items-center rounded-full text-[10px] ${dark ? "bg-paper text-ink" : "bg-ink text-paper"}`}>
+              <span className={`label absolute -right-0.5 -top-0.5 grid size-5 place-items-center rounded-full text-[10px] ${dark ? "bg-accent text-ink" : "bg-primary text-paper"}`}>
                 {count}
               </span>
             )}

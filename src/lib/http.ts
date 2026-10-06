@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { ZodError } from "zod";
 import { DomainError } from "@/lib/errors";
 
@@ -22,4 +23,14 @@ export function errorResponse(err: unknown) {
 
 export function clientIp(req: Request) {
   return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+}
+
+// Scheduled-job endpoints are called by GitHub Actions with `Authorization: Bearer $CRON_SECRET`.
+export function cronAuthorised(req: Request) {
+  const secret = process.env.CRON_SECRET;
+  const given = req.headers.get("authorization")?.replace(/^Bearer /, "") ?? "";
+  if (!secret) return false;
+  const a = Buffer.from(secret);
+  const b = Buffer.from(given);
+  return a.length === b.length && timingSafeEqual(a, b);
 }

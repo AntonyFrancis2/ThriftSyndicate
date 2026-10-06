@@ -53,7 +53,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
 
       <nav className="flex gap-1 overflow-x-auto">
         {statuses.map((s) => (
-          <Link key={s} href={`/admin/products?status=${s}`} className={`label px-3 py-2 ${status === s ? "bg-ink text-paper" : "bg-paper hover:bg-mist"}`}>
+          <Link key={s} href={`/admin/products?status=${s}`} className={`label px-3 py-2 ${status === s ? "bg-primary text-paper" : "bg-paper hover:bg-mist"}`}>
             {s === "ALL" ? "All" : s.charAt(0) + s.slice(1).toLowerCase()}
           </Link>
         ))}

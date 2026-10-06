@@ -10,7 +10,7 @@ export function AdminNav({ items }: { items: { href: string; label: string }[] }
       {items.map((i) => {
         const active = i.href === "/admin" ? path === "/admin" : path.startsWith(i.href);
         return (
-          <Link key={i.href} href={i.href} aria-current={active ? "page" : undefined} className={`label shrink-0 px-3 py-2 ${active ? "bg-paper text-ink" : "text-ash hover:text-paper"}`}>
+          <Link key={i.href} href={i.href} aria-current={active ? "page" : undefined} className={`label shrink-0 px-3 py-2 ${active ? "bg-accent text-ink" : "text-ash hover:text-paper"}`}>
             {i.label}
           </Link>
         );

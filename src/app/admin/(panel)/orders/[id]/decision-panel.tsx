@@ -44,7 +44,7 @@ export function ApprovalPanel({ orderId, items }: { orderId: string; items: Item
               <p className="font-medium">{i.title}</p>
               <p className="label text-steel">SKU {i.sku} · Size {i.size} · Rack <strong className="text-ink">{i.rackLocation ?? "—"}</strong></p>
             </div>
-            <label className={`label flex cursor-pointer items-center gap-2 border px-3 py-2 ${i.foundOnRack ? "border-ink bg-ink text-paper" : "border-ash"}`}>
+            <label className={`label flex cursor-pointer items-center gap-2 border px-3 py-2 ${i.foundOnRack ? "border-positive bg-positive text-ink" : "border-ash"}`}>
               <input
                 type="checkbox"
                 className="sr-only"
@@ -99,7 +99,7 @@ export function RejectForm({ orderId, amount }: { orderId: string; amount: strin
         <legend className="field-label mb-1">Reason</legend>
         {reasons.map((r) => (
           <label key={r.value} className="flex items-center gap-2 text-sm">
-            <input type="radio" name="reason" value={r.value} required className="accent-ink" />
+            <input type="radio" name="reason" value={r.value} required className="accent-primary" />
             {r.label}
           </label>
         ))}

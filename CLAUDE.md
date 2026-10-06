@@ -9,4 +9,4 @@
 - Branch admins only act on their own branch: use `assertBranchAccess` / `branchScope`.
 - No returns, exchanges or consignment anywhere in the product. Payment is captured at order time; rejection = full refund.
 - Run `npm test`, `npm run typecheck` and `npm run lint` before committing. Tests need `TEST_DATABASE_URL` and wipe that database.
-- Brand: black/white/grey tokens in `src/app/globals.css`; red (`signal`) only for errors and the Sold overlay.
+- Brand: colour tokens in `src/app/globals.css` (ink, primary, accent, positive, surface, signal) are defaults; admins edit them at `/admin/theme` and `src/lib/theme.ts` derives every token at runtime. Use the token classes, never raw hex. Red (`signal`) only for errors and the Sold overlay.

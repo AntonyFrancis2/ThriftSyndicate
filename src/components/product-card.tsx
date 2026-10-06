@@ -2,6 +2,7 @@ import Link from "next/link";
 import { conditionLabel } from "@/lib/catalog";
 import type { ProductCardData } from "@/lib/catalog";
 import { formatINR } from "@/lib/money";
+import { photoUrl } from "@/lib/photo-url";
 
 // Image on a Bone backdrop at 4:5, monospace era tag top-left, second photo on hover (PRD §6.2, §9.4).
 export function ProductCard({ product, priority = false }: { product: ProductCardData; priority?: boolean }) {
@@ -15,14 +16,14 @@ export function ProductCard({ product, priority = false }: { product: ProductCar
       <div className="relative aspect-[4/5] overflow-hidden bg-bone">
         {first && (
           // eslint-disable-next-line @next/next/no-img-element -- swapped for a CDN image component with Cloudinary
-          <img src={first.url} alt={first.altText} loading={priority ? "eager" : "lazy"} className="absolute inset-0 size-full object-cover" />
+          <img src={photoUrl(first.url, 640)} alt={first.altText} loading={priority ? "eager" : "lazy"} className="absolute inset-0 size-full object-cover" />
         )}
         {second && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={second.url} alt="" loading="lazy" className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+          <img src={photoUrl(second.url, 640)} alt="" loading="lazy" className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
         )}
         <span className="tag absolute left-3 top-3 bg-paper text-ink">{eraTag}</span>
-        {product.availability === "on_hold" && <span className="tag absolute right-3 top-3 bg-ink text-paper">On hold</span>}
+        {product.availability === "on_hold" && <span className="tag absolute right-3 top-3 border-primary bg-primary text-paper">On hold</span>}
         {sold && (
           <span className="absolute inset-0 grid place-items-center bg-paper/60">
             <span className="display -rotate-6 border-2 border-signal px-4 py-1 text-3xl text-signal">Sold</span>

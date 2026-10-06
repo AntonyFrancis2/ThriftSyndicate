@@ -18,7 +18,7 @@ const links = [
 export async function SiteFooter() {
   const branches = await db.branch.findMany({ orderBy: { name: "asc" } });
   return (
-    <footer className="mt-24 bg-ink text-paper [--logo-bg:#0a0a0a]">
+    <footer className="mt-24 bg-ink text-paper [--logo-bg:var(--color-ink)]">
       <div className="mx-auto grid max-w-[1440px] gap-12 px-4 py-16 md:grid-cols-4 md:px-8">
         <div className="space-y-4">
           <Logo />

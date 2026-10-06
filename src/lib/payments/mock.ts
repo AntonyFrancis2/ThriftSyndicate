@@ -40,6 +40,11 @@ export class MockGateway implements PaymentGateway {
     return p;
   }
 
+  // The mock keeps no timestamps; every payment it has seen is "in range".
+  async listPayments(): Promise<GatewayPayment[]> {
+    return [...payments.values()];
+  }
+
   async refund(): Promise<GatewayRefund> {
     return { id: id("rfnd"), status: "processed" };
   }

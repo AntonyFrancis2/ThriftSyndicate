@@ -6,6 +6,7 @@ import { bag } from "@/lib/bag-store";
 import { formatINR } from "@/lib/money";
 import { shippingFor } from "@/lib/pricing";
 import { groupByBranch, useBagItems } from "@/lib/use-bag-items";
+import { photoUrl } from "@/lib/photo-url";
 
 export default function BagPage() {
   const { items, loading, empty } = useBagItems();
@@ -42,7 +43,7 @@ export default function BagPage() {
                 <li key={i.variantId} className="flex gap-4 py-4">
                   <Link href={`/product/${i.slug}`} className="w-24 shrink-0 bg-bone">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {i.imageUrl && <img src={i.imageUrl} alt="" className="aspect-[4/5] w-full object-cover" />}
+                    {i.imageUrl && <img src={photoUrl(i.imageUrl, 240)} alt="" className="aspect-[4/5] w-full object-cover" />}
                   </Link>
                   <div className="flex flex-1 flex-col">
                     <div className="flex justify-between gap-3">

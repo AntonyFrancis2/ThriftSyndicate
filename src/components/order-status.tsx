@@ -6,7 +6,7 @@ export function StatusBadge({ status, className = "" }: { status: OrderStatus; c
     status === "REJECTED" || status === "CANCELLED" || status === "EXPIRED"
       ? "border-steel text-steel"
       : status === "AWAITING_APPROVAL" || status === "PENDING_PAYMENT"
-        ? "border-ink text-ink"
-        : "border-ink bg-ink text-paper";
+        ? "border-accent bg-accent text-ink"
+        : "border-positive bg-positive text-ink";
   return <span className={`tag ${tone} ${className}`}>{customerStatusLabel[status]}</span>;
 }

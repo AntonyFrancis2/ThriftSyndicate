@@ -6,6 +6,8 @@ export interface PaymentGateway {
   readonly keyId: string;
   createOrder(input: { amountPaise: number; receipt: string; notes?: Record<string, string> }): Promise<{ id: string }>;
   fetchPayment(paymentId: string): Promise<GatewayPayment>;
+  // Payments made between two times, for the nightly reconciliation.
+  listPayments(range: { from: Date; to: Date }): Promise<GatewayPayment[]>;
   refund(input: { paymentId: string; amountPaise: number; reason: string; instant: boolean }): Promise<GatewayRefund>;
   verifyPaymentSignature(input: { orderId: string; paymentId: string; signature: string }): boolean;
   verifyWebhookSignature(rawBody: string, signature: string): boolean;

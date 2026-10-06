@@ -1,5 +1,6 @@
 import { storeConfig } from "@/lib/config";
 import { db } from "@/lib/db";
+import { deliverPending } from "@/lib/notifications/deliver";
 import { notify } from "@/lib/notify";
 import { rejectOrder } from "./decisions";
 
@@ -11,6 +12,8 @@ export async function runScheduledJobs(now = new Date()) {
     expiredCheckouts: await expireUnpaidCheckouts(now),
     escalated: await escalateSlowApprovals(now),
     autoRejected: await autoRejectOverdue(now),
+    // Last, so messages written by the jobs above go out in the same run.
+    notifications: await deliverPending({ limit: 100 }),
   };
 }
 

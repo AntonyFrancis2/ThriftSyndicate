@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { requireAdmin } from "@/lib/auth/session";
 import { DomainError } from "@/lib/errors";
 import { duplicateProduct, markSoldInStore, productFormSchema, saveProduct, setProductStatus } from "@/lib/products";
+import { photoUploadTicket } from "@/lib/uploads";
 
 export type FormResult = { ok: false; error: string; fields?: Record<string, string> } | null;
 
@@ -75,4 +76,10 @@ export async function duplicateAction(formData: FormData) {
   const admin = await requireAdmin();
   const copy = await duplicateProduct({ id: String(formData.get("id")), actor: admin });
   redirect(`/admin/products/${copy.id}`);
+}
+
+// A one-off signed ticket for uploading a photo straight to Cloudinary; null when uploads aren't set up.
+export async function photoUploadTicketAction() {
+  await requireAdmin();
+  return photoUploadTicket();
 }

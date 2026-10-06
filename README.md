@@ -37,12 +37,19 @@ unless `PAYMENTS_MOCK=1` is set (for demos only — never on the live site).
 `payment.failed`, `order.paid`, `refund.processed`, `refund.failed`, and the same secret as `RAZORPAY_WEBHOOK_SECRET`.
 The account must use automatic capture.
 
-**Scheduled jobs.** Call this every 5 minutes (Vercel Cron, GitHub Actions or crontab). It releases unpaid holds after
-15 minutes, alerts the owner about orders undecided at 24 hours, and auto-rejects with a full refund at 48 hours.
+**Scheduled jobs.** In production GitHub Actions calls these (`.github/workflows/cron.yml`). The sweep runs every 5
+minutes: it releases unpaid holds after 15 minutes, alerts the owner about orders undecided at 24 hours, auto-rejects
+with a full refund at 48 hours, and sends any messages still waiting. `/api/cron/reconcile` runs nightly.
 
 ```bash
 curl -X POST -H "Authorization: Bearer $CRON_SECRET" https://<your-site>/api/cron/sweep
 ```
+
+**Photos and messages.** Without Cloudinary keys the product form takes image URLs; with them, staff upload photos
+directly. Messages (email, SMS, WhatsApp) are recorded in the `Notification` table and sent by whichever providers
+have keys; the rest are marked skipped. See `.env.example`.
+
+**Deploying:** see [DEPLOY.md](DEPLOY.md) for hosting, costs, the launch schedule and the release process.
 
 ## Tests
 
@@ -60,7 +67,10 @@ with refunds, refund failures, the 24h/48h deadlines, pickup codes, branch scopi
 
 | Area | Where |
 | --- | --- |
-| Business rules (checkout, payment, approval, refunds, jobs) | `src/lib/orders/` |
+| Business rules (checkout, payment, approval, refunds, jobs, reconciliation) | `src/lib/orders/` |
+| Message wording and delivery (Resend, MSG91, WhatsApp) | `src/lib/notifications/` |
+| Colour theme (admin-editable) | `src/lib/theme.ts`, `/admin/theme` |
+| Photo uploads (Cloudinary) | `src/lib/uploads.ts` |
 | Payment gateway (Razorpay + local mock) | `src/lib/payments/` |
 | Store settings to confirm with owners (holds, deadlines, shipping) | `src/lib/config.ts` |
 | Catalogue queries and search | `src/lib/catalog.ts` |
@@ -76,14 +86,11 @@ Stock only leaves the shelf when an order is approved.
 
 ## Not built yet
 
-- Photo upload (Cloudinary/S3) — products take image URLs for now; seed data uses placeholder drawings
-- Email, SMS and WhatsApp delivery — every message is recorded in the `Notification` table, ready for a provider (Resend, MSG91)
 - Customer accounts with phone OTP and saved addresses — guests track orders by private link or order number + mobile
 - Staff two-factor login
 - Discount codes, banners, scheduled drops and curated collections managed from the admin panel
 - Wishlist, "notify me", partial approval, bulk approve, CSV bulk upload, barcode scanning
 - Courier booking (Shiprocket) and real delivery estimates
-- Nightly Razorpay reconciliation job
 - Dark mode
 
 ## Open questions for the owners

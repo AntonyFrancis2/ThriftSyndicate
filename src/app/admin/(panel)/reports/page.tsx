@@ -20,7 +20,7 @@ function Bars({ title, rows, format }: { title: string; rows: [string, number][]
           {rows.map(([label, value]) => (
             <li key={label} className="grid grid-cols-[140px_1fr_auto] items-center gap-3 text-sm">
               <span className="truncate">{label}</span>
-              <span className="h-2 bg-mist"><span className="block h-2 bg-ink" style={{ width: `${(value / max) * 100}%` }} /></span>
+              <span className="h-2 bg-mist"><span className="block h-2 bg-primary" style={{ width: `${(value / max) * 100}%` }} /></span>
               <span className="label">{format(value)}</span>
             </li>
           ))}
@@ -52,7 +52,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/admin/re
         <h1 className="display text-5xl">Reports</h1>
         <div className="flex flex-wrap items-end gap-3">
           {[7, 30, 90].map((d) => (
-            <Link key={d} href={`/admin/reports?days=${d}${branch ? `&branch=${branch}` : ""}`} className={`label px-3 py-2 ${days === d ? "bg-ink text-paper" : "bg-paper"}`}>{d} days</Link>
+            <Link key={d} href={`/admin/reports?days=${d}${branch ? `&branch=${branch}` : ""}`} className={`label px-3 py-2 ${days === d ? "bg-primary text-paper" : "bg-paper"}`}>{d} days</Link>
           ))}
           {branches.length > 0 && <Suspense><BranchSwitcher branches={branches} /></Suspense>}
           <a href={exportHref} className="btn btn-secondary">Export CSV</a>

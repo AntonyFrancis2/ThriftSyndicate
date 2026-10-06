@@ -50,10 +50,10 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
       </div>
 
       {notice === "approved" && order.status !== "AWAITING_APPROVAL" && (
-        <p className="bg-ink p-4 text-paper" role="status">Approved. The customer has been told their order is being packed.</p>
+        <p className="bg-positive p-4 text-ink" role="status">Approved. The customer has been told their order is being packed.</p>
       )}
       {notice === "rejected" && order.status === "REJECTED" && (
-        <p className="bg-ink p-4 text-paper" role="status">
+        <p className="bg-positive p-4 text-ink" role="status">
           Rejected. {order.refunds.some((r) => r.status === "FAILED") ? "The refund failed — retry it from Payments." : `A full refund of ${formatINR(order.totalPaise)} has been issued and the customer told.`}
         </p>
       )}

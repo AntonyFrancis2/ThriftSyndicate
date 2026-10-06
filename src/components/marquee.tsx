@@ -2,11 +2,11 @@
 export function Marquee({ items }: { items: string[] }) {
   const row = [...items, ...items];
   return (
-    <div className="overflow-hidden border-b border-charcoal bg-ink py-2 text-paper" aria-label={items.join(". ")}>
+    <div className="overflow-hidden bg-accent py-2 text-ink" aria-label={items.join(". ")}>
       <div className="flex w-max animate-marquee gap-12 whitespace-nowrap" aria-hidden>
         {[...row, ...row].map((t, i) => (
           <span key={i} className="label">
-            {t} <span className="mx-6 text-steel">✦</span>
+            {t} <span className="mx-6 text-primary">✦</span>
           </span>
         ))}
       </div>

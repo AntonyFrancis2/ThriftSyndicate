@@ -173,27 +173,28 @@ export default function CheckoutPage() {
       <form onSubmit={onSubmit} className="mt-8 grid gap-12 lg:grid-cols-[1fr_380px]" noValidate>
         <fieldset disabled={!!created} className="space-y-12">
           <section className="space-y-5">
-            <h2 className="display text-3xl"><span className="label mr-3 align-middle text-steel">01</span>Contact</h2>
+            <h2 className="display text-3xl"><span className="label mr-3 align-middle text-primary">01</span>Contact</h2>
             <Input name="name" label="Full name" autoComplete="name" required errors={fieldErrors} />
             <div className="grid gap-5 md:grid-cols-2">
               <Input name="phone" label="Mobile number" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="98765 43210" required errors={fieldErrors} />
               <Input name="email" label="Email" type="email" autoComplete="email" required errors={fieldErrors} />
             </div>
             {fieldErrors.contact && <FieldError errors={fieldErrors} name="contact" />}
+            <p className="text-xs text-steel">We send order updates to this number by WhatsApp or SMS, and to your email.</p>
             <label className="flex items-start gap-2 text-sm text-graphite">
-              <input type="checkbox" name="marketing" className="mt-1 size-4 accent-ink" />
+              <input type="checkbox" name="marketing" className="mt-1 size-4 accent-primary" />
               Tell me about new drops by WhatsApp and email. You can opt out any time.
             </label>
           </section>
 
           <section className="space-y-5">
-            <h2 className="display text-3xl"><span className="label mr-3 align-middle text-steel">02</span>Delivery</h2>
+            <h2 className="display text-3xl"><span className="label mr-3 align-middle text-primary">02</span>Delivery</h2>
             <div className="grid gap-3 md:grid-cols-2" role="radiogroup" aria-label="Delivery method">
               {[
                 { v: "HOME" as const, t: "Home delivery", d: "Courier across India" },
                 { v: "PICKUP" as const, t: "Pick up at store", d: pickupPossible ? "Free · collect with a code" : "Not available for this bag" },
               ].map((o) => (
-                <label key={o.v} className={`cursor-pointer border p-4 ${delivery === o.v ? "border-ink" : "border-mist"} ${o.v === "PICKUP" && !pickupPossible ? "opacity-40" : ""}`}>
+                <label key={o.v} className={`cursor-pointer border p-4 ${delivery === o.v ? "border-primary bg-bone" : "border-mist"} ${o.v === "PICKUP" && !pickupPossible ? "opacity-40" : ""}`}>
                   <input type="radio" name="delivery" value={o.v} checked={delivery === o.v} disabled={o.v === "PICKUP" && !pickupPossible} onChange={() => setDelivery(o.v)} className="sr-only" />
                   <span className="block font-medium">{o.t}</span>
                   <span className="label text-steel">{o.d}</span>
@@ -226,7 +227,7 @@ export default function CheckoutPage() {
         </fieldset>
 
         <aside className="h-fit space-y-5 bg-bone p-6 lg:sticky lg:top-24">
-          <h2 className="display text-3xl"><span className="label mr-3 align-middle text-steel">03</span>Review & pay</h2>
+          <h2 className="display text-3xl"><span className="label mr-3 align-middle text-primary">03</span>Review & pay</h2>
           <ul className="space-y-3">
             {items.map((i) => (
               <li key={i.variantId} className="flex justify-between gap-3 text-sm">
@@ -241,8 +242,8 @@ export default function CheckoutPage() {
             <div className="flex justify-between text-base font-medium"><dt>Total incl. GST</dt><dd>{formatINR(created?.amountPaise ?? subtotal + shipping)}</dd></div>
           </dl>
 
-          <label className="flex items-start gap-3 border border-ink bg-paper p-3 text-sm">
-            <input type="checkbox" name="finalSale" required disabled={!!created} className="mt-0.5 size-4 shrink-0 accent-ink" aria-invalid={!!fieldErrors.finalSaleAccepted} />
+          <label className="flex items-start gap-3 border-2 border-primary bg-paper p-3 text-sm">
+            <input type="checkbox" name="finalSale" required disabled={!!created} className="mt-0.5 size-4 shrink-0 accent-primary" aria-invalid={!!fieldErrors.finalSaleAccepted} />
             <span>
               <strong>I understand all sales are final.</strong> There are no returns, exchanges or replacements. I&apos;ve checked the photos, condition and measurements.
             </span>

@@ -6,6 +6,7 @@ import { DeliveryEstimate } from "@/components/delivery-estimate";
 import { ProductGrid } from "@/components/product-card";
 import { categoryLabel, categorySlug, conditionLabel, conditionMeaning, getProductBySlug, relatedProducts } from "@/lib/catalog";
 import { formatINR } from "@/lib/money";
+import { photoUrl } from "@/lib/photo-url";
 
 const measurementLabels: Record<string, string> = {
   chest: "Chest (pit to pit)",
@@ -78,7 +79,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
           {product.images.map((img, i) => (
             <figure key={img.id} className="relative aspect-[4/5] w-[88%] shrink-0 snap-center bg-bone md:w-auto">
               {/* eslint-disable-next-line @next/next/no-img-element -- swapped for a CDN image component with Cloudinary */}
-              <img src={img.url} alt={img.altText} loading={i < 2 ? "eager" : "lazy"} className="size-full object-cover" />
+              <img src={photoUrl(img.url, 1200)} alt={img.altText} loading={i < 2 ? "eager" : "lazy"} className="size-full object-cover" />
             </figure>
           ))}
         </div>
@@ -99,9 +100,9 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
             variants={product.variants.map((v) => ({ id: v.id, size: v.size, free: product.freeVariantIds.includes(v.id) }))}
           />
 
-          <section className="border border-ink p-4">
+          <section className="border-2 border-primary p-4">
             <div className="flex items-center gap-3">
-              <span className="tag">{conditionLabel[product.condition]}</span>
+              <span className="tag border-positive bg-positive">{conditionLabel[product.condition]}</span>
               <span className="text-sm">{conditionMeaning[product.condition]}</span>
             </div>
             {product.flaws.length > 0 && (

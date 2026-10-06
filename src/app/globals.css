@@ -1,15 +1,21 @@
 @import "tailwindcss";
 
-/* ThriftSyndicate design tokens (PRD §9.2). Photos are the only full-colour element on the page. */
+/* ThriftSyndicate design tokens. These are the defaults; the admin Theme screen overrides them at runtime
+   (src/lib/theme.ts derives every value below from six editable colours and sets them on <html>). */
 @theme {
-  --color-ink: #0a0a0a;
-  --color-charcoal: #1f1f1f;
-  --color-graphite: #3d3d3d;
-  --color-steel: #6b6b6b;
-  --color-ash: #bdbdbd;
-  --color-mist: #e6e6e6;
-  --color-bone: #f5f5f3;
+  --color-ink: #14142b;
+  --color-charcoal: #27273c;
+  --color-graphite: #37374b;
+  --color-steel: #5f5f6f;
+  --color-ash: #bdbdc4;
+  --color-mist: #e3e3e6;
+  --color-bone: #f1f3ff;
   --color-paper: #ffffff;
+  /* Brand colours: primary for actions, accent for highlights, positive for good news. */
+  --color-primary: #2b44e0;
+  --color-primary-strong: #2338b8;
+  --color-accent: #ffd23f;
+  --color-positive: #3ddc97;
   /* Functional only: errors and the "Sold" overlay. Never decorative. */
   --color-signal: #c62828;
 
@@ -41,7 +47,7 @@
     outline-offset: 2px;
   }
   ::selection {
-    background: var(--color-ink);
+    background: var(--color-primary);
     color: var(--color-paper);
   }
 }
@@ -93,12 +99,13 @@
     opacity: 0.4;
   }
   .btn-primary {
-    background: var(--color-ink);
+    background: var(--color-primary);
     color: var(--color-paper);
-    border: 1px solid var(--color-ink);
+    border: 1px solid var(--color-primary);
   }
   .btn-primary:not(:disabled):hover {
-    background: var(--color-charcoal);
+    background: var(--color-primary-strong);
+    border-color: var(--color-primary-strong);
   }
   .btn-secondary {
     background: transparent;
@@ -121,7 +128,7 @@
   }
   .field:focus {
     outline: none;
-    border-bottom-color: var(--color-ink);
+    border-bottom-color: var(--color-primary);
   }
   .field[aria-invalid="true"] {
     border-bottom-color: var(--color-signal);
@@ -143,7 +150,7 @@
   }
   .box:focus {
     outline: none;
-    border-color: var(--color-ink);
+    border-color: var(--color-primary);
   }
 }
 

@@ -10,6 +10,9 @@ const grain =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E\")";
 
 // Curated collections; the super admin will manage these from the admin panel (PRD §7.7).
+// Each collection tile takes one of the brand colours in turn.
+const collectionTones = ["bg-accent text-ink", "bg-primary text-paper", "bg-positive text-ink"];
+
 const collections = [
   { label: "90s football", href: "/shop?category=jerseys&era=retro&decade=1990", note: "Umbro, Adidas, Nike" },
   { label: "Selvedge denim", href: "/shop?category=jeans&era=retro", note: "Levi's, Lee, Momotaro" },
@@ -22,13 +25,13 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-ink text-paper">
+      <section className="relative overflow-hidden bg-primary text-paper">
         <div className="pointer-events-none absolute inset-0 mix-blend-overlay" style={{ backgroundImage: grain }} aria-hidden />
         <div className="relative mx-auto flex min-h-[72vh] max-w-[1440px] flex-col justify-end px-4 pb-12 pt-24 md:px-8 md:pb-20">
-          <p className="label mb-6 text-ash">Drop 001 · Retro & latest · Tees, jeans, jerseys</p>
-          <h1 className="display max-w-5xl text-[64px] md:text-[120px]">One piece. One owner. Yours next.</h1>
+          <p className="label mb-6 text-accent">Drop 001 · Retro & latest · Tees, jeans, jerseys</p>
+          <h1 className="display max-w-5xl text-[64px] text-accent md:text-[120px]">One piece. One owner. Yours next.</h1>
           <div className="mt-10 flex flex-wrap gap-3">
-            <Link href="/shop" className="btn bg-paper text-ink hover:bg-mist">
+            <Link href="/shop" className="btn bg-accent text-ink hover:bg-paper">
               Shop the drop <ArrowRight className="size-4" strokeWidth={1.5} />
             </Link>
             <Link href="/shop?era=retro" className="btn border border-paper text-paper hover:bg-paper hover:text-ink">
@@ -38,8 +41,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-b border-mist" aria-label="Why ThriftSyndicate">
-        <ul className="label mx-auto grid max-w-[1440px] gap-3 px-4 py-5 text-graphite md:grid-cols-3 md:px-8">
+      <section className="bg-accent" aria-label="Why ThriftSyndicate">
+        <ul className="label mx-auto grid max-w-[1440px] gap-3 px-4 py-5 text-ink md:grid-cols-3 md:px-8">
           <li>Every piece photographed in-house</li>
           <li className="md:text-center">Secure payment by Razorpay</li>
           <li className="md:text-right">Ships from our 2 stores</li>
@@ -48,13 +51,13 @@ export default async function HomePage() {
 
       <section className="mx-auto grid max-w-[1440px] gap-3 px-4 pt-12 md:grid-cols-2 md:gap-6 md:px-8">
         {[
-          { label: "Retro", sub: "Vintage and pre-owned, 70s to 10s", href: "/shop?era=retro", dark: true },
-          { label: "Latest", sub: "This season's fits at thrift prices", href: "/shop?era=latest", dark: false },
+          { label: "Retro", sub: "Vintage and pre-owned, 70s to 10s", href: "/shop?era=retro", tone: "bg-primary text-paper" },
+          { label: "Latest", sub: "This season's fits at thrift prices", href: "/shop?era=latest", tone: "bg-accent text-ink" },
         ].map((t) => (
           <Link
             key={t.label}
             href={t.href}
-            className={`group flex aspect-[16/10] flex-col justify-between p-6 md:p-10 ${t.dark ? "bg-ink text-paper" : "bg-bone text-ink"}`}
+            className={`group flex aspect-[16/10] flex-col justify-between p-6 md:p-10 ${t.tone}`}
           >
             <span className="label">{t.sub}</span>
             <span className="display flex items-end justify-between text-7xl md:text-9xl">
@@ -67,11 +70,11 @@ export default async function HomePage() {
 
       <section className="mx-auto grid max-w-[1440px] grid-cols-3 gap-3 px-4 pt-3 md:gap-6 md:px-8 md:pt-6">
         {[
-          { label: "T-shirts", href: "/shop?category=t-shirts" },
-          { label: "Jeans", href: "/shop?category=jeans" },
-          { label: "Jerseys", href: "/shop?category=jerseys" },
+          { label: "T-shirts", href: "/shop?category=t-shirts", tone: "bg-accent text-ink" },
+          { label: "Jeans", href: "/shop?category=jeans", tone: "bg-positive text-ink" },
+          { label: "Jerseys", href: "/shop?category=jerseys", tone: "bg-primary text-paper" },
         ].map((c) => (
-          <Link key={c.href} href={c.href} className="display flex aspect-square items-end border border-ink p-4 text-2xl hover:bg-ink hover:text-paper md:p-8 md:text-5xl">
+          <Link key={c.href} href={c.href} className={`display flex aspect-square items-end p-4 text-2xl transition-colors hover:bg-ink hover:text-paper md:p-8 md:text-5xl ${c.tone}`}>
             {c.label}
           </Link>
         ))}
@@ -95,8 +98,8 @@ export default async function HomePage() {
         <h2 className="display mb-6 text-5xl md:text-7xl">Collections</h2>
         <div className="grid gap-3 md:grid-cols-3 md:gap-6">
           {collections.map((c, i) => (
-            <Link key={c.label} href={c.href} className="group flex min-h-48 flex-col justify-between bg-bone p-6 hover:bg-ink hover:text-paper">
-              <span className="label text-steel group-hover:text-ash">No. {String(i + 1).padStart(3, "0")}</span>
+            <Link key={c.label} href={c.href} className={`group flex min-h-48 flex-col justify-between p-6 transition-colors hover:bg-ink hover:text-paper ${collectionTones[i % collectionTones.length]}`}>
+              <span className="label opacity-80">No. {String(i + 1).padStart(3, "0")}</span>
               <span>
                 <span className="display block text-4xl">{c.label}</span>
                 <span className="text-sm">{c.note}</span>
@@ -110,8 +113,8 @@ export default async function HomePage() {
         <h2 className="display mb-6 text-5xl md:text-7xl">Our stores</h2>
         <div className="grid gap-3 md:grid-cols-2 md:gap-6">
           {branches.map((b) => (
-            <div key={b.id} className="border border-mist p-6">
-              <h3 className="display text-3xl">{b.name}</h3>
+            <div key={b.id} className="border-2 border-primary p-6">
+              <h3 className="display text-3xl text-primary">{b.name}</h3>
               <p className="mt-2 text-graphite">
                 {b.address}, {b.city} {b.pincode}
               </p>

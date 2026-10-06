@@ -15,11 +15,12 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
     { href: "/admin/customers", label: "Customers" },
     { href: "/admin/payments", label: "Payments" },
     { href: "/admin/reports", label: "Reports" },
+    { href: "/admin/theme", label: "Theme" },
     ...(admin.role === "SUPER_ADMIN" ? [{ href: "/admin/staff", label: "Staff" }] : []),
   ];
   return (
     <div className="flex min-h-screen flex-col bg-bone md:flex-row">
-      <aside className="bg-ink text-paper [--logo-bg:#0a0a0a] md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0">
+      <aside className="bg-ink text-paper [--logo-bg:var(--color-ink)] md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0">
         <div className="flex items-center justify-between p-4 md:block md:p-6">
           <Link href="/admin"><Logo /></Link>
           <p className="label mt-0 text-ash md:mt-6">{admin.name}<br className="hidden md:block" /><span className="md:hidden"> · </span>{branch ? branch.name : "All branches"}</p>

@@ -136,7 +136,7 @@ export default async function StaffPage({ searchParams }: PageProps<"/admin/staf
               <label><span className="field-label">GSTIN</span><input name="gstin" defaultValue={b.gstin ?? ""} className="field uppercase" /></label>
             </div>
             <label className="block"><span className="field-label">Hours</span><input name="hours" defaultValue={b.hours} className="field" /></label>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="pickupEnabled" defaultChecked={b.pickupEnabled} className="accent-ink" /> Offer free pickup at this store</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="pickupEnabled" defaultChecked={b.pickupEnabled} className="accent-primary" /> Offer free pickup at this store</label>
             <button className="btn btn-secondary">Save branch</button>
           </form>
         ))}

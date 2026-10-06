@@ -60,7 +60,7 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
       </div>
       <Select name="branch" label="Store" value={filters.branch} options={facets.branches.map((b) => ({ value: b.id, label: b.name }))} />
       <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="instock" value="1" defaultChecked={filters.inStock} className="size-4 accent-ink" />
+        <input type="checkbox" name="instock" value="1" defaultChecked={filters.inStock} className="size-4 accent-primary" />
         In stock only
       </label>
     </>

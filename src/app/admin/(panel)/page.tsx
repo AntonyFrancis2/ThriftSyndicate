@@ -42,10 +42,10 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {cards.map((c) => (
-          <Link key={c.label} href={c.href} className={`p-5 ${c.urgent ? "bg-ink text-paper" : "bg-paper"}`}>
+          <Link key={c.label} href={c.href} className={`p-5 ${c.urgent ? "bg-accent text-ink" : "bg-paper"}`}>
             <p className="field-label">{c.label}</p>
             <p className="display mt-2 text-5xl">{c.value}</p>
-            <p className={`label mt-1 ${c.urgent ? "text-ash" : "text-steel"}`}>{c.sub}</p>
+            <p className={`label mt-1 ${c.urgent ? "text-graphite" : "text-steel"}`}>{c.sub}</p>
           </Link>
         ))}
       </div>
@@ -62,7 +62,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
               const urgent = left <= 4;
               return (
                 <li key={o.id}>
-                  <Link href={`/admin/orders/${o.id}`} className={`flex flex-wrap items-center gap-x-6 gap-y-1 p-4 ${urgent ? "bg-ink text-paper" : "hover:bg-bone"}`}>
+                  <Link href={`/admin/orders/${o.id}`} className={`flex flex-wrap items-center gap-x-6 gap-y-1 p-4 ${urgent ? "bg-accent text-ink" : "hover:bg-bone"}`}>
                     <span className="label w-44">{o.number}</span>
                     <span className="flex-1">{o.customer.name} · {o.items.length} item{o.items.length === 1 ? "" : "s"}{admin.role === "SUPER_ADMIN" ? ` · ${o.branch.name}` : ""}</span>
                     <span className="label">{formatINR(o.totalPaise)}</span>

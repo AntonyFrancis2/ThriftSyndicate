@@ -30,7 +30,7 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <main className="grid min-h-screen place-items-center bg-bone px-4 [--logo-bg:#f5f5f3]">
+    <main className="grid min-h-screen place-items-center bg-bone px-4 [--logo-bg:var(--color-bone)]">
       <Suspense>
         <LoginForm />
       </Suspense>

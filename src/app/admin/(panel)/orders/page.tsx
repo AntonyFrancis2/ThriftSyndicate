@@ -62,7 +62,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/admin/ord
 
       <nav className="flex gap-1 overflow-x-auto" aria-label="Order status">
         {tabs.map((t) => (
-          <Link key={t.status} href={withParams(t.status)} aria-current={status === t.status ? "page" : undefined} className={`label shrink-0 px-3 py-2 ${status === t.status ? "bg-ink text-paper" : "bg-paper hover:bg-mist"}`}>
+          <Link key={t.status} href={withParams(t.status)} aria-current={status === t.status ? "page" : undefined} className={`label shrink-0 px-3 py-2 ${status === t.status ? "bg-primary text-paper" : "bg-paper hover:bg-mist"}`}>
             {t.label}
           </Link>
         ))}
@@ -86,7 +86,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/admin/ord
             {orders.map((o) => {
               const waited = hoursSince(o.paidAt);
               return (
-                <tr key={o.id} className={`border-b border-mist ${o.status === "AWAITING_APPROVAL" && waited >= 20 ? "bg-ink text-paper" : "hover:bg-bone"}`}>
+                <tr key={o.id} className={`border-b border-mist ${o.status === "AWAITING_APPROVAL" && waited >= 20 ? "bg-accent text-ink" : "hover:bg-bone"}`}>
                   <td className="p-3"><Link href={`/admin/orders/${o.id}`} className="label underline underline-offset-4">{o.number}</Link></td>
                   <td>{o.customer.name}<br /><span className="label text-steel">{o.customer.phone}</span></td>
                   <td>

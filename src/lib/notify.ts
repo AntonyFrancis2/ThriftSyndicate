@@ -1,8 +1,10 @@
 import type { Tx } from "@/lib/db";
 import { db } from "@/lib/db";
+import { deliverSoon } from "@/lib/notifications/deliver";
+import { phoneChannel } from "@/lib/notifications/providers";
 
-// Customer and staff messages (PRD §6.9). Every message is recorded; email/SMS/WhatsApp
-// providers (Resend, MSG91) are wired in later by reading this table or replacing send().
+// Customer and staff messages (PRD §6.9). Every message is recorded here first (inside the caller's
+// transaction when there is one) and sent afterwards by src/lib/notifications/deliver.ts.
 export type Template =
   | "order_placed"
   | "order_approved"
@@ -22,12 +24,13 @@ export async function notify(
   await tx.notification.create({
     data: { channel: input.channel, to: input.to, template: input.template, payload: input.payload as object, orderId: input.orderId },
   });
+  deliverSoon();
   if (process.env.NODE_ENV === "development") {
     console.info(`[notify:${input.channel}] ${input.template} → ${input.to}`);
   }
 }
 
-// Email + SMS to the customer for an order event.
+// Email plus a phone message (WhatsApp once set up, otherwise SMS) to the customer for an order event.
 export async function notifyCustomer(
   order: { id: string; number: string; customer: { email: string; phone: string } },
   template: Template,
@@ -37,6 +40,6 @@ export async function notifyCustomer(
   const data = { orderNumber: order.number, ...payload };
   await notify({ channel: "email", to: order.customer.email, template, payload: data, orderId: order.id }, tx);
   if (template !== "order_delivered") {
-    await notify({ channel: "sms", to: order.customer.phone, template, payload: data, orderId: order.id }, tx);
+    await notify({ channel: phoneChannel(), to: order.customer.phone, template, payload: data, orderId: order.id }, tx);
   }
 }

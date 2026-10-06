@@ -34,7 +34,7 @@ export function AddToBag({ variants, availability }: { variants: Variant[]; avai
                 disabled={!v.free}
                 onClick={() => setSelected(v.id)}
                 aria-pressed={selected === v.id}
-                className={`label min-w-12 border px-3 py-2 ${selected === v.id ? "border-ink bg-ink text-paper" : "border-ash"} disabled:line-through disabled:opacity-40`}
+                className={`label min-w-12 border px-3 py-2 ${selected === v.id ? "border-primary bg-primary text-paper" : "border-ash"} disabled:line-through disabled:opacity-40`}
               >
                 {v.size}
               </button>

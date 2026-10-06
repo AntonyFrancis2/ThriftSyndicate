@@ -1,0 +1,31 @@
+name: Database backup
+
+# Nightly encrypted dump kept for 14 days as a workflow artifact. The repository is public, so the dump is
+# encrypted with BACKUP_PASSPHRASE before upload; without the passphrase the file is unreadable.
+# Restore: gpg --decrypt backup.dump.gpg > backup.dump && pg_restore --clean --no-owner -d "$DATABASE_URL" backup.dump
+# Needs repository secrets DATABASE_URL (production, direct connection) and BACKUP_PASSPHRASE.
+on:
+  schedule:
+    - cron: "0 22 * * *" # 03:30 IST
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Dump and encrypt
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then echo "Backup secrets not set; skipping"; exit 0; fi
+          docker run --rm postgres:17 pg_dump --format=custom --no-owner "$DATABASE_URL" > backup.dump
+          test -s backup.dump
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 -o backup.dump.gpg backup.dump
+          rm backup.dump
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backup.dump.gpg
+          retention-days: 14

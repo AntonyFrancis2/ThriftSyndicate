@@ -1,8 +1,19 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import { ArrowLeft, Plus, Upload, X } from "lucide-react";
 import { useState, useTransition } from "react";
-import { saveProductAction, type FormResult } from "./actions";
+import { storeConfig } from "@/lib/config";
+import { photoUrl } from "@/lib/photo-url";
+import { photoUploadTicketAction, saveProductAction, type FormResult } from "./actions";
+
+const MAX_PHOTOS = storeConfig.maxPhotos;
+
+function move<T>(list: T[], from: number, to: number): T[] {
+  const next = [...list];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
+}
 
 export interface ProductFormValues {
   branchId: string;
@@ -63,7 +74,50 @@ export function ProductForm({
   const fields = result && !result.ok ? (result.fields ?? {}) : {};
   const measurementFields = v.category === "JEANS" ? jeansFields : topFields;
   const images = v.images.split("\n").map((s) => s.trim()).filter(Boolean);
-  const retroGrades = [["DEADSTOCK", "Deadstock"], ["EXCELLENT", "Excellent"], ["VERY_GOOD", "Very good"], ["GOOD", "Good"]];
+  const setImages = (list: string[]) => set("images")(list.join("\n"));
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  // Each photo goes straight from the browser to Cloudinary with a ticket signed by the server.
+  async function upload(files: FileList | null) {
+    if (!files?.length) return;
+    setUploadError("");
+    const room = MAX_PHOTOS - images.length;
+    const chosen = Array.from(files).slice(0, room);
+    if (files.length > room) setUploadError(`Only ${MAX_PHOTOS} photos fit; the first ${room} were added.`);
+    setUploading(true);
+    const added: string[] = [];
+    try {
+      for (const file of chosen) {
+        if (file.size > 10 * 1024 * 1024) {
+          setUploadError(`${file.name} is over 10 MB. Export it smaller and try again.`);
+          continue;
+        }
+        const ticket = await photoUploadTicketAction();
+        if (!ticket) {
+          setUploadError("Photo upload isn't set up yet (Cloudinary keys missing). Paste image URLs instead.");
+          break;
+        }
+        const body = new FormData();
+        for (const [k, val] of Object.entries(ticket.fields)) body.append(k, val);
+        body.append("file", file);
+        const res = await fetch(ticket.url, { method: "POST", body });
+        const json = (await res.json()) as { secure_url?: string; error?: { message?: string } };
+        if (!res.ok || !json.secure_url) {
+          setUploadError(`${file.name} didn't upload: ${json.error?.message ?? res.statusText}`);
+          continue;
+        }
+        added.push(json.secure_url);
+      }
+    } catch {
+      setUploadError("Upload failed. Check your connection and try again.");
+    } finally {
+      if (added.length) setV((s) => ({ ...s, images: [...s.images.split("\n").map((x) => x.trim()).filter(Boolean), ...added].join("\n") }));
+      setUploading(false);
+    }
+  }
+
+  const retroGrades =[["DEADSTOCK", "Deadstock"], ["EXCELLENT", "Excellent"], ["VERY_GOOD", "Very good"], ["GOOD", "Good"]];
   const latestGrades = [["NEW", "New"], ["LIKE_NEW", "Like new"]];
 
   function submit(publish: boolean) {
@@ -184,19 +238,39 @@ export function ProductForm({
         </section>
 
         <section className="space-y-3 bg-paper p-5">
-          <h2 className="field-label">Photos (4–8: front, back, tag, detail, flaws) — one URL per line, in display order</h2>
-          <textarea value={v.images} onChange={(e) => set("images")(e.target.value)} rows={5} className="box font-mono text-xs" aria-invalid={!!fields.images} />
-          {fields.images && <p className="text-xs text-signal">{fields.images}</p>}
+          <h2 className="field-label">Photos (4–8: front, back, tag, detail, flaws). The first is the cover.</h2>
           <div className="flex flex-wrap gap-2">
             {images.map((src, i) => (
-              <figure key={`${src}-${i}`} className="relative w-20">
+              <figure key={`${src}-${i}`} className="w-24">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" className="aspect-[4/5] w-full bg-bone object-cover" />
-                <figcaption className="label text-steel">{i + 1}</figcaption>
+                <img src={photoUrl(src, 200)} alt={`Photo ${i + 1}`} className="aspect-[4/5] w-full bg-bone object-cover" />
+                <figcaption className="mt-1 flex items-center justify-between">
+                  <span className="label text-steel">{i + 1}</span>
+                  <span className="flex">
+                    <button type="button" className="p-1 disabled:opacity-30" onClick={() => setImages(move(images, i, i - 1))} disabled={i === 0} aria-label={`Move photo ${i + 1} earlier`}>
+                      <ArrowLeft className="size-4" strokeWidth={1.5} />
+                    </button>
+                    <button type="button" className="p-1" onClick={() => setImages(images.filter((_, j) => j !== i))} aria-label={`Remove photo ${i + 1}`}>
+                      <X className="size-4" strokeWidth={1.5} />
+                    </button>
+                  </span>
+                </figcaption>
               </figure>
             ))}
+            {images.length < MAX_PHOTOS && (
+              <label className={`label flex aspect-[4/5] w-24 cursor-pointer flex-col items-center justify-center gap-1 border-2 border-dashed border-primary text-center text-primary ${uploading ? "opacity-50" : ""}`}>
+                <Upload className="size-5" strokeWidth={1.5} aria-hidden />
+                {uploading ? "Uploading…" : "Add photos"}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple className="sr-only" disabled={uploading} onChange={(e) => upload(e.target.files)} />
+              </label>
+            )}
           </div>
-          <p className="label text-steel">Photo upload with automatic resizing arrives with the image CDN (Cloudinary). For now, paste image URLs.</p>
+          {uploadError && <p className="text-xs text-signal" role="alert">{uploadError}</p>}
+          {fields.images && <p className="text-xs text-signal">{fields.images}</p>}
+          <details>
+            <summary className="label cursor-pointer text-steel">Or paste photo URLs, one per line</summary>
+            <textarea value={v.images} onChange={(e) => set("images")(e.target.value)} rows={4} className="box mt-2 font-mono text-xs" aria-invalid={!!fields.images} />
+          </details>
         </section>
       </div>
 

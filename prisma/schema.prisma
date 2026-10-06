@@ -359,6 +359,7 @@ model AdminUser {
   approvedOrders Order[]    @relation("ApprovedOrders")
   refunds        Refund[]
   auditLogs      AuditLog[]
+  themeChanges   SiteTheme[]
 }
 
 model AuditLog {
@@ -375,6 +376,15 @@ model AuditLog {
   @@index([entity, entityId])
 }
 
+// The storefront and admin colour scheme, editable by admins (one row, id "default").
+model SiteTheme {
+  id          String     @id @default("default")
+  colors      Json // ThemeColors, validated by src/lib/theme.ts
+  updatedById String?
+  updatedBy   AdminUser? @relation(fields: [updatedById], references: [id])
+  updatedAt   DateTime   @updatedAt
+}
+
 // Razorpay webhook events already processed; the same event may arrive twice.
 model WebhookEvent {
   id         String   @id // x-razorpay-event-id header
@@ -382,13 +392,30 @@ model WebhookEvent {
   receivedAt DateTime @default(now())
 }
 
-// Outbound messages. Delivery providers (email, SMS, WhatsApp) plug in later; this is the record.
+enum NotificationStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+  SKIPPED // channel not configured (e.g. no SMS provider yet); kept as the record
+}
+
+// Outbound messages, written as an outbox: rows are recorded with the change that caused them and
+// delivered afterwards by src/lib/notifications/deliver.ts (right after the request, and retried by the cron sweep).
 model Notification {
-  id        String   @id @default(cuid())
-  channel   String // email | sms | whatsapp | admin
-  to        String
-  template  String
-  payload   Json
-  orderId   String?
-  createdAt DateTime @default(now())
+  id         String             @id @default(cuid())
+  channel    String // email | sms | whatsapp | admin
+  to         String
+  template   String
+  payload    Json
+  orderId    String?
+  status     NotificationStatus @default(PENDING)
+  attempts   Int                @default(0)
+  claimedAt  DateTime?
+  sentAt     DateTime?
+  providerId String?
+  error      String?
+  createdAt  DateTime           @default(now())
+
+  @@index([status, createdAt])
 }
