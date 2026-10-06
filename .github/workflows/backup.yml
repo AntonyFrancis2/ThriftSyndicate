@@ -20,7 +20,7 @@ jobs:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
           if [ -z "$DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then echo "Backup secrets not set; skipping"; exit 0; fi
-          docker run --rm postgres:17 pg_dump --format=custom --no-owner "$DATABASE_URL" > backup.dump
+          docker run --rm postgres:18 pg_dump --format=custom --no-owner "$DATABASE_URL" > backup.dump
           test -s backup.dump
           gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 -o backup.dump.gpg backup.dump
           rm backup.dump

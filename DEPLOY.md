@@ -28,7 +28,7 @@ tier that is a settings change, not a rebuild.
 | --- | --- | --- |
 | URL | `<project>-git-main-<team>.vercel.app`, plus a preview link per pull request | your domain |
 | Deploys from | every push to `main` and every pull request | the `production` branch (see Releases) |
-| Database | Neon branch `staging` | Neon branch `main` |
+| Database | Neon branch `staging` | Neon branch `production` |
 | Razorpay | test keys | live keys |
 | Messages | email only, to staff addresses | email + SMS/WhatsApp |
 
@@ -49,7 +49,7 @@ Owner tasks marked **(owner)** need the business's documents or logins; start th
 4. **(owner) WhatsApp.** Meta Business Suite → verify the business → WhatsApp Manager → add a phone number not
    already on WhatsApp → submit the seven templates below as category **Utility**. Optional at launch: SMS covers phones
    until WhatsApp is approved.
-5. **Neon.** Create project `thriftsyndicate` (Postgres 17, region Asia Pacific). Create branch `staging`. For each
+5. **Neon.** Project `ThriftSyndicate` (`patient-mode-71241691`, Postgres 18, Singapore). Branches: `production` and `staging` (made from it). For each
    branch copy the **pooled** connection string (host contains `-pooler`) → `DATABASE_URL`, and the **direct** one →
    `DIRECT_URL`.
 6. **Vercel.** Import the GitHub repo. Settings → Git → Production Branch: `production` (so `main` is staging and
