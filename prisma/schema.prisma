@@ -1,0 +1,421 @@
+// ThriftSyndicate data model. See PRD §11.
+// All money is stored as integer paise (₹999 = 99900).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  TSHIRT
+  JEANS
+  JERSEY
+}
+
+enum Era {
+  RETRO
+  LATEST
+}
+
+// Retro items use the first four grades; latest-season items use NEW / LIKE_NEW (PRD §4).
+enum Condition {
+  DEADSTOCK
+  EXCELLENT
+  VERY_GOOD
+  GOOD
+  NEW
+  LIKE_NEW
+}
+
+// "On hold" is not stored: it is derived from active reservations (BR5).
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+  SOLD
+}
+
+enum DeliveryType {
+  HOME
+  PICKUP
+}
+
+enum CheckoutStatus {
+  PENDING_PAYMENT // Razorpay order created, customer has not paid yet
+  PAID // payment captured, branch orders are in the approval queue
+  EXPIRED // reservation window lapsed without payment
+  FAILED
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  AWAITING_APPROVAL
+  CONFIRMED
+  PACKED
+  SHIPPED
+  READY_FOR_PICKUP
+  DELIVERED
+  COLLECTED
+  REJECTED
+  CANCELLED
+  EXPIRED
+}
+
+enum OrderItemStatus {
+  ACTIVE
+  REJECTED
+}
+
+enum RejectionReason {
+  SOLD_IN_STORE
+  DAMAGED
+  CANNOT_LOCATE
+  SUSPECTED_FRAUD
+  NOT_AVAILABLE_AT_PAYMENT // payment arrived after the reservation lapsed and the item was gone
+  AUTO_TIMEOUT // no decision within the deadline (BR4)
+  OTHER
+}
+
+enum PaymentStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+enum ReservationStatus {
+  HELD // counts against stock
+  RELEASED // returned to stock (expired, cancelled, rejected)
+  CONSUMED // order approved, stock decremented
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  BRANCH_ADMIN
+}
+
+model Branch {
+  id            String   @id @default(cuid())
+  code          String   @unique // short code used in order numbers, e.g. "IND"
+  name          String
+  address       String
+  city          String
+  state         String   @default("") // for CGST+SGST vs IGST on invoices
+  pincode       String
+  phone         String
+  hours         String
+  mapUrl        String?
+  gstin         String?
+  pickupEnabled Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  products Product[]
+  orders   Order[]
+  admins   AdminUser[]
+}
+
+model Product {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  sku            String        @unique
+  branchId       String
+  branch         Branch        @relation(fields: [branchId], references: [id])
+  title          String
+  description    String        @default("")
+  category       Category
+  era            Era
+  brand          String
+  team           String? // jerseys
+  season         String? // jerseys, e.g. "1998/99"
+  kitType        String? // home / away / third
+  authenticity   String? // authentic / replica
+  playerPrint    String?
+  decade         Int? // 1970, 1980 ... 2020
+  condition      Condition
+  flaws          String[]      @default([])
+  // Measured garment size in cm, e.g. {"chest":54,"length":72} or {"waist":81,"inseam":79}
+  measurements   Json          @default("{}")
+  material       String?
+  colour         String?
+  pricePaise     Int
+  compareAtPaise Int?
+  status         ProductStatus @default(DRAFT)
+  rackLocation   String?
+  tags           String[]      @default([])
+  publishedAt    DateTime?
+  soldAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  variants ProductVariant[]
+  images   ProductImage[]
+
+  @@index([status, category, era])
+  @@index([branchId])
+}
+
+model ProductVariant {
+  id        String @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String // tag size: "M", "32", "XL"
+  stockQty  Int    @default(1) // retro items: one variant with qty 1
+
+  orderItems   OrderItem[]
+  reservations Reservation[]
+
+  @@unique([productId, size])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  position  Int
+  altText   String  @default("")
+
+  @@index([productId, position])
+}
+
+model Customer {
+  id               String   @id @default(cuid())
+  name             String
+  phone            String   @unique
+  email            String
+  marketingConsent Boolean  @default(false)
+  blocked          Boolean  @default(false)
+  notes            String   @default("")
+  createdAt        DateTime @default(now())
+
+  checkouts Checkout[]
+  orders    Order[]
+}
+
+// One Razorpay payment. Holds the contact/delivery details and pays for one order per branch (BR6).
+// This is the PRD's payment_group.
+model Checkout {
+  id                   String         @id @default(cuid())
+  customerId           String
+  customer             Customer       @relation(fields: [customerId], references: [id])
+  status               CheckoutStatus @default(PENDING_PAYMENT)
+  totalPaise           Int
+  deliveryType         DeliveryType
+  address              Json? // {line1, line2, city, state, pincode}
+  pickupBranchId       String?
+  finalSaleAcceptedAt  DateTime // BR1: the required "all sales final" checkbox, timestamped
+  razorpayOrderId      String         @unique
+  accessToken          String         @unique // lets a guest view/cancel their orders
+  reservationExpiresAt DateTime
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  orders       Order[]
+  payments     Payment[]
+  reservations Reservation[]
+}
+
+model Order {
+  id              String           @id @default(cuid())
+  number          String           @unique // e.g. TS-IND-240931-4821
+  checkoutId      String
+  checkout        Checkout         @relation(fields: [checkoutId], references: [id])
+  customerId      String
+  customer        Customer         @relation(fields: [customerId], references: [id])
+  branchId        String
+  branch          Branch           @relation(fields: [branchId], references: [id])
+  status          OrderStatus      @default(PENDING_PAYMENT)
+  subtotalPaise   Int
+  shippingPaise   Int
+  taxPaise        Int // GST included in the total
+  totalPaise      Int
+  refundedPaise   Int              @default(0)
+  deliveryType    DeliveryType
+  address         Json?
+  customerNote    String           @default("")
+  paidAt          DateTime?
+  approvedById    String?
+  approvedBy      AdminUser?       @relation("ApprovedOrders", fields: [approvedById], references: [id])
+  approvedAt      DateTime?
+  rejectionReason RejectionReason?
+  rejectionNote   String?
+  decidedAt       DateTime?
+  escalatedAt     DateTime? // 24h alert sent to super admin (BR4)
+  courier         String?
+  awb             String?
+  trackingUrl     String?
+  pickupOtp       String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  items   OrderItem[]
+  refunds Refund[]
+  events  OrderEvent[]
+
+  @@index([status, branchId])
+  @@index([checkoutId])
+}
+
+model OrderItem {
+  id          String          @id @default(cuid())
+  orderId     String
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId   String
+  variant     ProductVariant  @relation(fields: [variantId], references: [id])
+  title       String // snapshot at purchase
+  size        String
+  imageUrl    String?
+  pricePaise  Int
+  quantity    Int             @default(1)
+  foundOnRack Boolean         @default(false)
+  status      OrderItemStatus @default(ACTIVE)
+}
+
+model Reservation {
+  id         String            @id @default(cuid())
+  variantId  String
+  variant    ProductVariant    @relation(fields: [variantId], references: [id])
+  checkoutId String
+  checkout   Checkout          @relation(fields: [checkoutId], references: [id])
+  quantity   Int
+  status     ReservationStatus @default(HELD)
+  // Null once paid: held until the admin decides (BR5).
+  expiresAt  DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@index([variantId, status])
+  @@index([checkoutId])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  checkoutId        String
+  checkout          Checkout      @relation(fields: [checkoutId], references: [id])
+  razorpayOrderId   String
+  razorpayPaymentId String        @unique
+  method            String?
+  amountPaise       Int
+  feePaise          Int?
+  taxPaise          Int?
+  status            PaymentStatus
+  capturedAt        DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  refunds Refund[]
+}
+
+model Refund {
+  id               String       @id @default(cuid())
+  paymentId        String
+  payment          Payment      @relation(fields: [paymentId], references: [id])
+  orderId          String
+  order            Order        @relation(fields: [orderId], references: [id])
+  razorpayRefundId String?      @unique
+  amountPaise      Int
+  reason           String
+  status           RefundStatus @default(PENDING)
+  createdById      String? // null = system (auto-reject, customer cancel)
+  createdBy        AdminUser?   @relation(fields: [createdById], references: [id])
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+// Every order state change, for the customer timeline and the audit trail.
+model OrderEvent {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  message   String
+  actorId   String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole
+  branchId     String? // null for super admins
+  branch       Branch?   @relation(fields: [branchId], references: [id])
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  approvedOrders Order[]    @relation("ApprovedOrders")
+  refunds        Refund[]
+  auditLogs      AuditLog[]
+  themeChanges   SiteTheme[]
+}
+
+model AuditLog {
+  id        String     @id @default(cuid())
+  adminId   String?
+  admin     AdminUser? @relation(fields: [adminId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  before    Json?
+  after     Json?
+  createdAt DateTime   @default(now())
+
+  @@index([entity, entityId])
+}
+
+// The storefront and admin colour scheme, editable by admins (one row, id "default").
+model SiteTheme {
+  id          String     @id @default("default")
+  colors      Json // ThemeColors, validated by src/lib/theme.ts
+  updatedById String?
+  updatedBy   AdminUser? @relation(fields: [updatedById], references: [id])
+  updatedAt   DateTime   @updatedAt
+}
+
+// Razorpay webhook events already processed; the same event may arrive twice.
+model WebhookEvent {
+  id         String   @id // x-razorpay-event-id header
+  event      String
+  receivedAt DateTime @default(now())
+}
+
+enum NotificationStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+  SKIPPED // channel not configured (e.g. no SMS provider yet); kept as the record
+}
+
+// Outbound messages, written as an outbox: rows are recorded with the change that caused them and
+// delivered afterwards by src/lib/notifications/deliver.ts (right after the request, and retried by the cron sweep).
+model Notification {
+  id         String             @id @default(cuid())
+  channel    String // email | sms | whatsapp | admin
+  to         String
+  template   String
+  payload    Json
+  orderId    String?
+  status     NotificationStatus @default(PENDING)
+  attempts   Int                @default(0)
+  claimedAt  DateTime?
+  sentAt     DateTime?
+  providerId String?
+  error      String?
+  createdAt  DateTime           @default(now())
+
+  @@index([status, createdAt])
+}

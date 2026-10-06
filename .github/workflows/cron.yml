@@ -1,0 +1,30 @@
+name: Scheduled jobs
+
+# GitHub runs schedules on a best-effort basis (often a few minutes late), which these jobs tolerate.
+# Needs repository secrets SITE_URL (https://… no trailing slash) and CRON_SECRET (same value as on Vercel).
+on:
+  schedule:
+    - cron: "*/5 * * * *" # sweep: holds, approval deadlines, message delivery
+    - cron: "30 21 * * *" # 03:00 IST: payment reconciliation
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Which job to run
+        type: choice
+        options: [sweep, reconcile]
+        default: sweep
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Call the site
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          JOB: ${{ github.event.schedule == '30 21 * * *' && 'reconcile' || inputs.job || 'sweep' }}
+        run: |
+          if [ -z "$SITE_URL" ]; then echo "SITE_URL secret not set; skipping"; exit 0; fi
+          curl --fail-with-body --silent --show-error --max-time 120 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" "$SITE_URL/api/cron/$JOB"

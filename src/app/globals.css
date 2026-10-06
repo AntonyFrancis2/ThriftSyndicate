@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+/* ThriftSyndicate design tokens. These are the defaults; the admin Theme screen overrides them at runtime
+   (src/lib/theme.ts derives every value below from six editable colours and sets them on <html>). */
+@theme {
+  --color-ink: #14142b;
+  --color-charcoal: #27273c;
+  --color-graphite: #37374b;
+  --color-steel: #5f5f6f;
+  --color-ash: #bdbdc4;
+  --color-mist: #e3e3e6;
+  --color-bone: #f1f3ff;
+  --color-paper: #ffffff;
+  /* Brand colours: primary for actions, accent for highlights, positive for good news. */
+  --color-primary: #2b44e0;
+  --color-primary-strong: #2338b8;
+  --color-accent: #ffd23f;
+  --color-positive: #3ddc97;
+  /* Functional only: errors and the "Sold" overlay. Never decorative. */
+  --color-signal: #c62828;
+
+  --font-display: var(--font-anton), "Impact", sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-tag: 2px;
+  --animate-marquee: marquee 30s linear infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-paper);
+  }
+}
+
+@layer components {
+  /* Condensed uppercase headline. */
+  .display {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+  }
+  /* "Archive label" detail text: SKUs, era tags, sizes (PRD §9.3). */
+  .label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+  /* Thrift price-tag motif. */
+  .tag {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    border: 1px solid currentColor;
+    border-radius: var(--radius-tag);
+    padding: 2px 6px;
+    display: inline-block;
+    line-height: 1.4;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 24px;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--radius-tag);
+    transition: background-color 150ms, color 150ms, border-color 150ms;
+    cursor: pointer;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+  .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-paper);
+    border: 1px solid var(--color-primary);
+  }
+  .btn-primary:not(:disabled):hover {
+    background: var(--color-primary-strong);
+    border-color: var(--color-primary-strong);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid var(--color-ink);
+  }
+  .btn-secondary:not(:disabled):hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  /* Underline-style inputs (PRD §9.4). */
+  .field {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-ash);
+    padding: 10px 0;
+    font-size: 16px;
+    border-radius: 0;
+  }
+  .field:focus {
+    outline: none;
+    border-bottom-color: var(--color-primary);
+  }
+  .field[aria-invalid="true"] {
+    border-bottom-color: var(--color-signal);
+  }
+  .field-label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--color-steel);
+  }
+  .box {
+    border: 1px solid var(--color-mist);
+    padding: 12px;
+    border-radius: 0;
+    background: var(--color-paper);
+    width: 100%;
+    font-size: 15px;
+  }
+  .box:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
